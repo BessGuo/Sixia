@@ -343,7 +343,7 @@ export default function NotesPage() {
               记录每一个灵感瞬间
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground mb-8 text-balance text-center max-w-md leading-relaxed">
-              思匣，一个极简的笔记工具。快速记录你的想法，随时回顾你的创意时刻。
+              一个极简的笔记工具。快速记录你的想法，随时回顾你的创意时刻。
             </p>
             <Button
               onClick={() => setShowAuthDialog(true)}
