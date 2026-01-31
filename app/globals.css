@@ -30,22 +30,22 @@
 /* 温暖米色 */
 .theme-warm {
   --background: oklch(0.97 0.01 85);
-  --foreground: oklch(0.30 0.02 60);
+  --foreground: oklch(0.3 0.02 60);
   --card: oklch(0.99 0.008 85);
-  --card-foreground: oklch(0.30 0.02 60);
+  --card-foreground: oklch(0.3 0.02 60);
   --popover: oklch(0.99 0.008 85);
-  --popover-foreground: oklch(0.30 0.02 60);
+  --popover-foreground: oklch(0.3 0.02 60);
   --primary: oklch(0.42 0.08 45);
   --primary-foreground: oklch(0.99 0.008 85);
   --secondary: oklch(0.94 0.015 80);
-  --secondary-foreground: oklch(0.30 0.02 60);
+  --secondary-foreground: oklch(0.3 0.02 60);
   --muted: oklch(0.94 0.015 80);
-  --muted-foreground: oklch(0.50 0.02 60);
+  --muted-foreground: oklch(0.5 0.02 60);
   --accent: oklch(0.55 0.12 75);
   --accent-foreground: oklch(0.99 0.008 85);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.99 0.008 85);
-  --border: oklch(0.90 0.015 80);
+  --border: oklch(0.9 0.015 80);
   --input: oklch(0.93 0.015 85);
   --ring: oklch(0.42 0.08 45);
 }
@@ -58,7 +58,7 @@
   --card-foreground: oklch(0.28 0.03 170);
   --popover: oklch(0.995 0.008 160);
   --popover-foreground: oklch(0.28 0.03 170);
-  --primary: oklch(0.45 0.10 165);
+  --primary: oklch(0.45 0.1 165);
   --primary-foreground: oklch(0.995 0.008 160);
   --secondary: oklch(0.95 0.012 155);
   --secondary-foreground: oklch(0.28 0.03 170);
@@ -70,7 +70,7 @@
   --destructive-foreground: oklch(0.995 0.008 160);
   --border: oklch(0.91 0.012 155);
   --input: oklch(0.94 0.012 160);
-  --ring: oklch(0.45 0.10 165);
+  --ring: oklch(0.45 0.1 165);
 }
 
 .dark {
@@ -80,7 +80,7 @@
   --card-foreground: oklch(0.95 0 0);
   --popover: oklch(0.18 0 0);
   --popover-foreground: oklch(0.95 0 0);
-  --primary: oklch(0.90 0 0);
+  --primary: oklch(0.9 0 0);
   --primary-foreground: oklch(0.15 0 0);
   --secondary: oklch(0.25 0 0);
   --secondary-foreground: oklch(0.95 0 0);
@@ -88,11 +88,11 @@
   --muted-foreground: oklch(0.65 0 0);
   --accent: oklch(0.55 0.08 240);
   --accent-foreground: oklch(0.95 0 0);
-  --destructive: oklch(0.50 0.20 25);
+  --destructive: oklch(0.5 0.2 25);
   --destructive-foreground: oklch(0.95 0 0);
   --border: oklch(0.25 0 0);
   --input: oklch(0.22 0 0);
-  --ring: oklch(0.70 0 0);
+  --ring: oklch(0.7 0 0);
 }
 
 @theme inline {

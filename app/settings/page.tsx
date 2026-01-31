@@ -1,10 +1,15 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { ArrowLeftIcon, CheckIcon, LayoutListIcon, LayoutGridIcon } from 'lucide-react'
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import {
+  ArrowLeftIcon,
+  CheckIcon,
+  LayoutListIcon,
+  LayoutGridIcon,
+} from 'lucide-react';
 
 const themes = [
   {
@@ -55,7 +60,7 @@ const themes = [
       accent: 'bg-blue-900',
     },
   },
-]
+];
 
 const layouts = [
   {
@@ -70,34 +75,34 @@ const layouts = [
     description: 'INS 风格瀑布流，灵动自然',
     icon: LayoutGridIcon,
   },
-]
+];
 
 export default function SettingsPage() {
-  const router = useRouter()
-  const [selectedTheme, setSelectedTheme] = useState('default')
-  const [selectedLayout, setSelectedLayout] = useState('list')
+  const router = useRouter();
+  const [selectedTheme, setSelectedTheme] = useState('default');
+  const [selectedLayout, setSelectedLayout] = useState('list');
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'default'
-    const savedLayout = localStorage.getItem('layout') || 'list'
-    setSelectedTheme(savedTheme)
-    setSelectedLayout(savedLayout)
-  }, [])
+    const savedTheme = localStorage.getItem('theme') || 'default';
+    const savedLayout = localStorage.getItem('layout') || 'list';
+    setSelectedTheme(savedTheme);
+    setSelectedLayout(savedLayout);
+  }, []);
 
   const handleThemeChange = (themeId: string) => {
-    setSelectedTheme(themeId)
-    localStorage.setItem('theme', themeId)
+    setSelectedTheme(themeId);
+    localStorage.setItem('theme', themeId);
 
-    const theme = themes.find((t) => t.id === themeId)
+    const theme = themes.find((t) => t.id === themeId);
     if (theme) {
-      document.documentElement.className = theme.className
+      document.documentElement.className = theme.className;
     }
-  }
+  };
 
   const handleLayoutChange = (layoutId: string) => {
-    setSelectedLayout(layoutId)
-    localStorage.setItem('layout', layoutId)
-  }
+    setSelectedLayout(layoutId);
+    localStorage.setItem('layout', layoutId);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -140,11 +145,21 @@ export default function SettingsPage() {
                 <div className="flex items-start gap-4">
                   {/* Preview */}
                   <div className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border border-border shadow-sm">
-                    <div className={`w-full h-full ${theme.preview.background} p-1.5`}>
-                      <div className={`w-full h-full ${theme.preview.card} rounded p-1`}>
-                        <div className={`w-full h-2 ${theme.preview.text} opacity-80 rounded-sm mb-1`} />
-                        <div className={`w-2/3 h-2 ${theme.preview.text} opacity-60 rounded-sm mb-1`} />
-                        <div className={`w-4 h-4 ${theme.preview.accent} rounded-sm mt-auto ml-auto`} />
+                    <div
+                      className={`w-full h-full ${theme.preview.background} p-1.5`}
+                    >
+                      <div
+                        className={`w-full h-full ${theme.preview.card} rounded p-1`}
+                      >
+                        <div
+                          className={`w-full h-2 ${theme.preview.text} opacity-80 rounded-sm mb-1`}
+                        />
+                        <div
+                          className={`w-2/3 h-2 ${theme.preview.text} opacity-60 rounded-sm mb-1`}
+                        />
+                        <div
+                          className={`w-4 h-4 ${theme.preview.accent} rounded-sm mt-auto ml-auto`}
+                        />
                       </div>
                     </div>
                   </div>
@@ -152,7 +167,9 @@ export default function SettingsPage() {
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-medium text-foreground">{theme.name}</h3>
+                      <h3 className="font-medium text-foreground">
+                        {theme.name}
+                      </h3>
                       {selectedTheme === theme.id && (
                         <CheckIcon className="w-4 h-4 text-primary flex-shrink-0" />
                       )}
@@ -176,7 +193,7 @@ export default function SettingsPage() {
 
           <div className="grid grid-cols-2 gap-3">
             {layouts.map((layout) => {
-              const IconComponent = layout.icon
+              const IconComponent = layout.icon;
               return (
                 <Card
                   key={layout.id}
@@ -212,7 +229,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
                 </Card>
-              )
+              );
             })}
           </div>
         </section>
@@ -226,5 +243,5 @@ export default function SettingsPage() {
         </section>
       </main>
     </div>
-  )
+  );
 }

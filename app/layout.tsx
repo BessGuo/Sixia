@@ -1,18 +1,18 @@
-import React from "react"
-import type { Metadata } from 'next'
-import { Noto_Serif_SC, Inter } from 'next/font/google'
-import { Analytics } from '@vercel/analytics/next'
-import './globals.css'
+import React from 'react';
+import type { Metadata } from 'next';
+import { Noto_Serif_SC, Inter } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/next';
+import './globals.css';
 
-const notoSerifSC = Noto_Serif_SC({ 
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: '--font-serif'
+const notoSerifSC = Noto_Serif_SC({
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
+  variable: '--font-serif',
 });
 
-const inter = Inter({ 
-  subsets: ["latin"],
-  variable: '--font-sans'
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-sans',
 });
 
 export const metadata: Metadata = {
@@ -36,19 +36,21 @@ export const metadata: Metadata = {
     ],
     apple: '/apple-icon.png',
   },
-}
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="zh-CN">
-      <body className={`${inter.variable} ${notoSerifSC.variable} font-sans antialiased`}>
+      <body
+        className={`${inter.variable} ${notoSerifSC.variable} font-sans antialiased`}
+      >
         {children}
         <Analytics />
       </body>
     </html>
-  )
+  );
 }

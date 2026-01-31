@@ -1,153 +1,204 @@
-'use client'
+'use client';
 
-import React from "react"
+import React from 'react';
 
-import { useState, useEffect, useMemo, useRef } from 'react'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { useState, useEffect, useMemo, useRef } from 'react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { PlusIcon, SettingsIcon, LogOutIcon, SearchIcon, XIcon, SparklesIcon, ImageIcon } from 'lucide-react'
+} from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  PlusIcon,
+  SettingsIcon,
+  LogOutIcon,
+  SearchIcon,
+  XIcon,
+  SparklesIcon,
+  ImageIcon,
+} from 'lucide-react';
 
-type ContentBlock = 
+type ContentBlock =
   | { type: 'text'; content: string }
-  | { type: 'image'; src: string }
+  | { type: 'image'; src: string };
 
 type Note = {
-  id: string
-  blocks: ContentBlock[]
-  timestamp: string
-}
+  id: string;
+  blocks: ContentBlock[];
+  timestamp: string;
+};
 
 const initialNotes: Note[] = [
   {
     id: '1',
-    blocks: [{ type: 'text', content: '春江潮水连海平，海上明月共潮生。滟滟随波千万里，何处春江无月明。' }],
+    blocks: [
+      {
+        type: 'text',
+        content:
+          '春江潮水连海平，海上明月共潮生。滟滟随波千万里，何处春江无月明。',
+      },
+    ],
     timestamp: '2024-01-20 14:30',
   },
   {
     id: '2',
-    blocks: [{ type: 'text', content: '君不见黄河之水天上来，奔流到海不复回。君不见高堂明镜悲白发，朝如青丝暮成雪。' }],
+    blocks: [
+      {
+        type: 'text',
+        content:
+          '君不见黄河之水天上来，奔流到海不复回。君不见高堂明镜悲白发，朝如青丝暮成雪。',
+      },
+    ],
     timestamp: '2024-01-19 09:15',
   },
   {
     id: '3',
-    blocks: [{ type: 'text', content: '曾经沧海难为水，除却巫山不是云。取次花丛懒回顾，半缘修道半缘君。' }],
+    blocks: [
+      {
+        type: 'text',
+        content:
+          '曾经沧海难为水，除却巫山不是云。取次花丛懒回顾，半缘修道半缘君。',
+      },
+    ],
     timestamp: '2024-01-18 20:45',
   },
   {
     id: '4',
-    blocks: [{ type: 'text', content: '明月几时有？把酒问青天。不知天上宫阙，今夕是何年。' }],
+    blocks: [
+      {
+        type: 'text',
+        content: '明月几时有？把酒问青天。不知天上宫阙，今夕是何年。',
+      },
+    ],
     timestamp: '2024-01-17 16:20',
   },
   {
     id: '5',
-    blocks: [{ type: 'text', content: '独在异乡为异客，每逢佳节倍思亲。遥知兄弟登高处，遍插茱萸少一人。' }],
+    blocks: [
+      {
+        type: 'text',
+        content:
+          '独在异乡为异客，每逢佳节倍思亲。遥知兄弟登高处，遍插茱萸少一人。',
+      },
+    ],
     timestamp: '2024-01-16 11:00',
   },
-]
+];
 
 export default function NotesPage() {
-  const [notes, setNotes] = useState(initialNotes)
-  const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([{ type: 'text', content: '' }])
-  const [isExpanded, setIsExpanded] = useState(false)
-  const [layout, setLayout] = useState<'list' | 'masonry'>('list')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [showAuthDialog, setShowAuthDialog] = useState(false)
-  const [loginEmail, setLoginEmail] = useState('')
-  const [loginPassword, setLoginPassword] = useState('')
-  const [registerEmail, setRegisterEmail] = useState('')
-  const [registerPassword, setRegisterPassword] = useState('')
-  const [registerConfirmPassword, setRegisterConfirmPassword] = useState('')
-  const [registerName, setRegisterName] = useState('')
-  const editorRef = useRef<HTMLDivElement>(null)
+  const [notes, setNotes] = useState(initialNotes);
+  const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([
+    { type: 'text', content: '' },
+  ]);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [layout, setLayout] = useState<'list' | 'masonry'>('list');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [registerEmail, setRegisterEmail] = useState('');
+  const [registerPassword, setRegisterPassword] = useState('');
+  const [registerConfirmPassword, setRegisterConfirmPassword] = useState('');
+  const [registerName, setRegisterName] = useState('');
+  const editorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'default'
+    const savedTheme = localStorage.getItem('theme') || 'default';
     const themeClasses: Record<string, string> = {
       default: '',
       warm: 'theme-warm',
       fresh: 'theme-fresh',
       dark: 'dark',
-    }
-    document.documentElement.className = themeClasses[savedTheme] || ''
+    };
+    document.documentElement.className = themeClasses[savedTheme] || '';
 
-    const savedLayout = localStorage.getItem('layout') || 'list'
-    setLayout(savedLayout as 'list' | 'masonry')
+    const savedLayout = localStorage.getItem('layout') || 'list';
+    setLayout(savedLayout as 'list' | 'masonry');
 
-    const loginStatus = localStorage.getItem('isLoggedIn') === 'true'
-    setIsLoggedIn(loginStatus)
-  }, [])
+    const loginStatus = localStorage.getItem('isLoggedIn') === 'true';
+    setIsLoggedIn(loginStatus);
+  }, []);
 
   const filteredNotes = useMemo(() => {
     if (!searchQuery.trim()) {
-      return notes
+      return notes;
     }
     return notes.filter((note) =>
-      note.blocks.some(block => 
-        block.type === 'text' && block.content.toLowerCase().includes(searchQuery.toLowerCase())
+      note.blocks.some(
+        (block) =>
+          block.type === 'text' &&
+          block.content.toLowerCase().includes(searchQuery.toLowerCase())
       )
-    )
-  }, [notes, searchQuery])
+    );
+  }, [notes, searchQuery]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files) return
+    const files = e.target.files;
+    if (!files) return;
 
     Array.from(files).forEach((file) => {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onloadend = () => {
-        const imgSrc = reader.result as string
-        setContentBlocks(prev => [...prev, { type: 'image', src: imgSrc }, { type: 'text', content: '' }])
-      }
-      reader.readAsDataURL(file)
-    })
-    e.target.value = ''
-  }
+        const imgSrc = reader.result as string;
+        setContentBlocks((prev) => [
+          ...prev,
+          { type: 'image', src: imgSrc },
+          { type: 'text', content: '' },
+        ]);
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = '';
+  };
 
   const handleTextChange = (index: number, value: string) => {
-    setContentBlocks(prev => {
-      const newBlocks = [...prev]
+    setContentBlocks((prev) => {
+      const newBlocks = [...prev];
       if (newBlocks[index] && newBlocks[index].type === 'text') {
-        (newBlocks[index] as { type: 'text'; content: string }).content = value
+        (newBlocks[index] as { type: 'text'; content: string }).content = value;
       }
-      return newBlocks
-    })
-  }
+      return newBlocks;
+    });
+  };
 
   const handleRemoveBlock = (index: number) => {
-    setContentBlocks(prev => {
-      const newBlocks = prev.filter((_, i) => i !== index)
-      return newBlocks.length === 0 ? [{ type: 'text', content: '' }] : newBlocks
-    })
-  }
+    setContentBlocks((prev) => {
+      const newBlocks = prev.filter((_, i) => i !== index);
+      return newBlocks.length === 0
+        ? [{ type: 'text', content: '' }]
+        : newBlocks;
+    });
+  };
 
   const handleAddNote = () => {
-    const hasContent = contentBlocks.some(block => 
-      (block.type === 'text' && block.content.trim()) || block.type === 'image'
-    )
+    const hasContent = contentBlocks.some(
+      (block) =>
+        (block.type === 'text' && block.content.trim()) ||
+        block.type === 'image'
+    );
 
     if (hasContent) {
-      const filteredBlocks = contentBlocks.filter(block =>
-        block.type === 'image' || (block.type === 'text' && block.content.trim())
-      )
+      const filteredBlocks = contentBlocks.filter(
+        (block) =>
+          block.type === 'image' ||
+          (block.type === 'text' && block.content.trim())
+      );
 
       const note: Note = {
         id: Date.now().toString(),
@@ -159,67 +210,78 @@ export default function NotesPage() {
           hour: '2-digit',
           minute: '2-digit',
         }),
-      }
-      setNotes([note, ...notes])
-      setContentBlocks([{ type: 'text', content: '' }])
-      setIsExpanded(false)
+      };
+      setNotes([note, ...notes]);
+      setContentBlocks([{ type: 'text', content: '' }]);
+      setIsExpanded(false);
     }
-  }
+  };
 
   const handleLogin = () => {
     if (loginEmail && loginPassword) {
-      setIsLoggedIn(true)
-      localStorage.setItem('isLoggedIn', 'true')
-      setShowAuthDialog(false)
-      setLoginEmail('')
-      setLoginPassword('')
+      setIsLoggedIn(true);
+      localStorage.setItem('isLoggedIn', 'true');
+      setShowAuthDialog(false);
+      setLoginEmail('');
+      setLoginPassword('');
     }
-  }
+  };
 
   const handleRegister = () => {
-    if (registerEmail && registerPassword && registerConfirmPassword && registerName && registerPassword === registerConfirmPassword) {
-      setIsLoggedIn(true)
-      localStorage.setItem('isLoggedIn', 'true')
-      setShowAuthDialog(false)
-      setRegisterEmail('')
-      setRegisterPassword('')
-      setRegisterConfirmPassword('')
-      setRegisterName('')
+    if (
+      registerEmail &&
+      registerPassword &&
+      registerConfirmPassword &&
+      registerName &&
+      registerPassword === registerConfirmPassword
+    ) {
+      setIsLoggedIn(true);
+      localStorage.setItem('isLoggedIn', 'true');
+      setShowAuthDialog(false);
+      setRegisterEmail('');
+      setRegisterPassword('');
+      setRegisterConfirmPassword('');
+      setRegisterName('');
     }
-  }
+  };
 
   const handleLogout = () => {
-    setIsLoggedIn(false)
-    localStorage.setItem('isLoggedIn', 'false')
-  }
+    setIsLoggedIn(false);
+    localStorage.setItem('isLoggedIn', 'false');
+  };
 
   const renderNoteContent = (blocks: ContentBlock[]) => {
     return blocks.map((block, idx) => {
       if (block.type === 'text') {
         return (
-          <p key={idx} className="font-serif text-base leading-relaxed text-foreground text-pretty whitespace-pre-wrap">
+          <p
+            key={idx}
+            className="font-serif text-base leading-relaxed text-foreground text-pretty whitespace-pre-wrap"
+          >
             {block.content}
           </p>
-        )
+        );
       } else {
         return (
           <img
             key={idx}
-            src={block.src || "/placeholder.svg"}
+            src={block.src || '/placeholder.svg'}
             alt=""
             className="w-full h-auto rounded-lg object-cover my-3"
           />
-        )
+        );
       }
-    })
-  }
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-10 backdrop-blur-lg bg-background/80 border-b border-border">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-serif font-semibold text-foreground">思匣</h1>
+            <h1 className="text-2xl font-serif font-semibold text-foreground">
+              思匣
+            </h1>
             <p className="text-xs text-muted-foreground mt-0.5">SIXIA</p>
           </div>
           <div className="flex items-center gap-4">
@@ -230,7 +292,10 @@ export default function NotesPage() {
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="focus:outline-none focus:ring-2 focus:ring-ring rounded-full" type="button">
+                    <button
+                      className="focus:outline-none focus:ring-2 focus:ring-ring rounded-full"
+                      type="button"
+                    >
                       <Avatar className="w-9 h-9 cursor-pointer hover:opacity-80 transition-opacity">
                         <AvatarFallback className="bg-accent text-accent-foreground text-sm font-medium">
                           思
@@ -353,15 +418,21 @@ export default function NotesPage() {
                   <PlusIcon className="w-8 h-8 text-muted-foreground" />
                 </div>
                 <p className="text-muted-foreground text-sm">暂无记录</p>
-                <p className="text-muted-foreground text-xs mt-1">点击下方按钮开始记录</p>
+                <p className="text-muted-foreground text-xs mt-1">
+                  点击下方按钮开始记录
+                </p>
               </div>
             ) : filteredNotes.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 text-center">
                 <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
                   <SearchIcon className="w-8 h-8 text-muted-foreground" />
                 </div>
-                <p className="text-muted-foreground text-sm">未找到匹配的笔记</p>
-                <p className="text-muted-foreground text-xs mt-1">尝试使用其他关键词搜索</p>
+                <p className="text-muted-foreground text-sm">
+                  未找到匹配的笔记
+                </p>
+                <p className="text-muted-foreground text-xs mt-1">
+                  尝试使用其他关键词搜索
+                </p>
               </div>
             ) : layout === 'masonry' ? (
               <div className="columns-1 sm:columns-2 gap-4 space-y-4">
@@ -403,7 +474,9 @@ export default function NotesPage() {
       <Dialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-serif">欢迎来到思匣</DialogTitle>
+            <DialogTitle className="text-2xl font-serif">
+              欢迎来到思匣
+            </DialogTitle>
             <DialogDescription>登录或注册开始记录你的想法</DialogDescription>
           </DialogHeader>
 
@@ -415,7 +488,12 @@ export default function NotesPage() {
 
             <TabsContent value="login" className="space-y-4 mt-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground" htmlFor="login-email">邮箱</label>
+                <label
+                  className="text-sm font-medium text-foreground"
+                  htmlFor="login-email"
+                >
+                  邮箱
+                </label>
                 <Input
                   id="login-email"
                   type="email"
@@ -426,7 +504,12 @@ export default function NotesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground" htmlFor="login-password">密码</label>
+                <label
+                  className="text-sm font-medium text-foreground"
+                  htmlFor="login-password"
+                >
+                  密码
+                </label>
                 <Input
                   id="login-password"
                   type="password"
@@ -447,7 +530,12 @@ export default function NotesPage() {
 
             <TabsContent value="register" className="space-y-4 mt-6">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground" htmlFor="register-name">昵称</label>
+                <label
+                  className="text-sm font-medium text-foreground"
+                  htmlFor="register-name"
+                >
+                  昵称
+                </label>
                 <Input
                   id="register-name"
                   type="text"
@@ -458,7 +546,12 @@ export default function NotesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground" htmlFor="register-email">邮箱</label>
+                <label
+                  className="text-sm font-medium text-foreground"
+                  htmlFor="register-email"
+                >
+                  邮箱
+                </label>
                 <Input
                   id="register-email"
                   type="email"
@@ -469,7 +562,12 @@ export default function NotesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground" htmlFor="register-password">密码</label>
+                <label
+                  className="text-sm font-medium text-foreground"
+                  htmlFor="register-password"
+                >
+                  密码
+                </label>
                 <Input
                   id="register-password"
                   type="password"
@@ -480,7 +578,12 @@ export default function NotesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground" htmlFor="register-confirm">确认密码</label>
+                <label
+                  className="text-sm font-medium text-foreground"
+                  htmlFor="register-confirm"
+                >
+                  确认密码
+                </label>
                 <Input
                   id="register-confirm"
                   type="password"
@@ -489,13 +592,22 @@ export default function NotesPage() {
                   onChange={(e) => setRegisterConfirmPassword(e.target.value)}
                   className="h-11"
                 />
-                {registerConfirmPassword && registerPassword !== registerConfirmPassword && (
-                  <p className="text-xs text-destructive">两次输入的密码不一致</p>
-                )}
+                {registerConfirmPassword &&
+                  registerPassword !== registerConfirmPassword && (
+                    <p className="text-xs text-destructive">
+                      两次输入的密码不一致
+                    </p>
+                  )}
               </div>
               <Button
                 onClick={handleRegister}
-                disabled={!registerEmail || !registerPassword || !registerConfirmPassword || !registerName || registerPassword !== registerConfirmPassword}
+                disabled={
+                  !registerEmail ||
+                  !registerPassword ||
+                  !registerConfirmPassword ||
+                  !registerName ||
+                  registerPassword !== registerConfirmPassword
+                }
                 className="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-11"
               >
                 注册
@@ -516,15 +628,19 @@ export default function NotesPage() {
                       {block.type === 'text' ? (
                         <textarea
                           value={block.content}
-                          onChange={(e) => handleTextChange(index, e.target.value)}
-                          placeholder={index === 0 ? "记录此刻的想法..." : "继续输入..."}
+                          onChange={(e) =>
+                            handleTextChange(index, e.target.value)
+                          }
+                          placeholder={
+                            index === 0 ? '记录此刻的想法...' : '继续输入...'
+                          }
                           className="w-full bg-transparent font-serif text-base resize-none border-none outline-none text-foreground placeholder:text-muted-foreground min-h-[2rem]"
                           rows={3}
                         />
                       ) : (
                         <div className="relative my-3 group/img">
                           <img
-                            src={block.src || "/placeholder.svg"}
+                            src={block.src || '/placeholder.svg'}
                             alt=""
                             className="w-full max-h-64 object-contain rounded-lg"
                           />
@@ -558,15 +674,21 @@ export default function NotesPage() {
                   </label>
                   <Button
                     onClick={handleAddNote}
-                    disabled={!contentBlocks.some(b => (b.type === 'text' && b.content.trim()) || b.type === 'image')}
+                    disabled={
+                      !contentBlocks.some(
+                        (b) =>
+                          (b.type === 'text' && b.content.trim()) ||
+                          b.type === 'image'
+                      )
+                    }
                     className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
                   >
                     保存
                   </Button>
                   <Button
                     onClick={() => {
-                      setIsExpanded(false)
-                      setContentBlocks([{ type: 'text', content: '' }])
+                      setIsExpanded(false);
+                      setContentBlocks([{ type: 'text', content: '' }]);
                     }}
                     variant="outline"
                     className="px-6"
@@ -589,5 +711,5 @@ export default function NotesPage() {
         </div>
       )}
     </div>
-  )
+  );
 }
