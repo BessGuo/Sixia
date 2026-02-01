@@ -39,69 +39,13 @@ type ContentBlock =
 
 type Note = {
   id: string;
-  blocks: ContentBlock[];
-  timestamp: string;
+  content: ContentBlock[];
+  createdAt: string;
+  updatedAt: string;
 };
 
-const initialNotes: Note[] = [
-  {
-    id: '1',
-    blocks: [
-      {
-        type: 'text',
-        content:
-          '春江潮水连海平，海上明月共潮生。滟滟随波千万里，何处春江无月明。',
-      },
-    ],
-    timestamp: '2024-01-20 14:30',
-  },
-  {
-    id: '2',
-    blocks: [
-      {
-        type: 'text',
-        content:
-          '君不见黄河之水天上来，奔流到海不复回。君不见高堂明镜悲白发，朝如青丝暮成雪。',
-      },
-    ],
-    timestamp: '2024-01-19 09:15',
-  },
-  {
-    id: '3',
-    blocks: [
-      {
-        type: 'text',
-        content:
-          '曾经沧海难为水，除却巫山不是云。取次花丛懒回顾，半缘修道半缘君。',
-      },
-    ],
-    timestamp: '2024-01-18 20:45',
-  },
-  {
-    id: '4',
-    blocks: [
-      {
-        type: 'text',
-        content: '明月几时有？把酒问青天。不知天上宫阙，今夕是何年。',
-      },
-    ],
-    timestamp: '2024-01-17 16:20',
-  },
-  {
-    id: '5',
-    blocks: [
-      {
-        type: 'text',
-        content:
-          '独在异乡为异客，每逢佳节倍思亲。遥知兄弟登高处，遍插茱萸少一人。',
-      },
-    ],
-    timestamp: '2024-01-16 11:00',
-  },
-];
-
 export default function NotesPage() {
-  const [notes, setNotes] = useState(initialNotes);
+  const [notes, setNotes] = useState<Note[]>([]);
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([
     { type: 'text', content: '' },
   ]);
@@ -116,6 +60,13 @@ export default function NotesPage() {
   const [registerPassword, setRegisterPassword] = useState('');
   const [registerConfirmPassword, setRegisterConfirmPassword] = useState('');
   const [registerName, setRegisterName] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentUser, setCurrentUser] = useState<{
+    id: string;
+    email: string;
+    name: string;
+  } | null>(null);
   const editorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -133,14 +84,36 @@ export default function NotesPage() {
 
     const loginStatus = localStorage.getItem('isLoggedIn') === 'true';
     setIsLoggedIn(loginStatus);
+
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+      const user = JSON.parse(savedUser);
+      setCurrentUser(user);
+      if (loginStatus) {
+        fetchNotes(user.id);
+      }
+    }
   }, []);
+
+  const fetchNotes = async (userId: string) => {
+    try {
+      const response = await fetch(`/api/notes?userId=${userId}`);
+
+      if (response.ok) {
+        const data = await response.json();
+        setNotes(data.notes || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch notes:', error);
+    }
+  };
 
   const filteredNotes = useMemo(() => {
     if (!searchQuery.trim()) {
       return notes;
     }
     return notes.filter((note) =>
-      note.blocks.some(
+      note.content.some(
         (block) =>
           block.type === 'text' &&
           block.content.toLowerCase().includes(searchQuery.toLowerCase())
@@ -186,7 +159,9 @@ export default function NotesPage() {
     });
   };
 
-  const handleAddNote = () => {
+  const handleAddNote = async () => {
+    if (!currentUser) return;
+
     const hasContent = contentBlocks.some(
       (block) =>
         (block.type === 'text' && block.content.trim()) ||
@@ -200,54 +175,133 @@ export default function NotesPage() {
           (block.type === 'text' && block.content.trim())
       );
 
-      const note: Note = {
-        id: Date.now().toString(),
-        blocks: filteredBlocks,
-        timestamp: new Date().toLocaleString('zh-CN', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
+      try {
+        const response = await fetch(`/api/notes?userId=${currentUser.id}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            content: filteredBlocks,
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setNotes([data.note, ...notes]);
+          setContentBlocks([{ type: 'text', content: '' }]);
+          setIsExpanded(false);
+        }
+      } catch (error) {
+        console.error('Failed to create note:', error);
+      }
+    }
+  };
+
+  const handleLogin = async () => {
+    if (!loginEmail || !loginPassword) return;
+
+    setIsLoading(true);
+    setAuthError('');
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: loginEmail,
+          password: loginPassword,
         }),
-      };
-      setNotes([note, ...notes]);
-      setContentBlocks([{ type: 'text', content: '' }]);
-      setIsExpanded(false);
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setIsLoggedIn(true);
+        setCurrentUser(data.user);
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('currentUser', JSON.stringify(data.user));
+        setShowAuthDialog(false);
+        setLoginEmail('');
+        setLoginPassword('');
+        setAuthError('');
+        // Load user's notes
+        fetchNotes(data.user.id);
+      } else {
+        setAuthError(data.error || '登录失败');
+      }
+    } catch (error) {
+      setAuthError('网络错误，请稍后重试');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleLogin = () => {
-    if (loginEmail && loginPassword) {
-      setIsLoggedIn(true);
-      localStorage.setItem('isLoggedIn', 'true');
-      setShowAuthDialog(false);
-      setLoginEmail('');
-      setLoginPassword('');
-    }
-  };
-
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (
-      registerEmail &&
-      registerPassword &&
-      registerConfirmPassword &&
-      registerName &&
-      registerPassword === registerConfirmPassword
+      !registerEmail ||
+      !registerPassword ||
+      !registerConfirmPassword ||
+      !registerName ||
+      registerPassword !== registerConfirmPassword
     ) {
-      setIsLoggedIn(true);
-      localStorage.setItem('isLoggedIn', 'true');
-      setShowAuthDialog(false);
-      setRegisterEmail('');
-      setRegisterPassword('');
-      setRegisterConfirmPassword('');
-      setRegisterName('');
+      return;
+    }
+
+    setIsLoading(true);
+    setAuthError('');
+
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: registerEmail,
+          password: registerPassword,
+          name: registerName,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setIsLoggedIn(true);
+        setCurrentUser(data.user);
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('currentUser', JSON.stringify(data.user));
+        setShowAuthDialog(false);
+        setRegisterEmail('');
+        setRegisterPassword('');
+        setRegisterConfirmPassword('');
+        setRegisterName('');
+        setAuthError('');
+        // Load user's notes
+        fetchNotes(data.user.id);
+      } else {
+        setAuthError(data.error || '注册失败');
+      }
+    } catch (error) {
+      setAuthError('网络错误，请稍后重试');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
+    setCurrentUser(null);
     localStorage.setItem('isLoggedIn', 'false');
+    localStorage.removeItem('currentUser');
+  };
+
+  const formatNoteTime = (createdAt: string) => {
+    return new Date(createdAt).toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
   const renderNoteContent = (blocks: ContentBlock[]) => {
@@ -298,7 +352,7 @@ export default function NotesPage() {
                     >
                       <Avatar className="w-9 h-9 cursor-pointer hover:opacity-80 transition-opacity">
                         <AvatarFallback className="bg-accent text-accent-foreground text-sm font-medium">
-                          思
+                          {currentUser?.name?.charAt(0) || '思'}
                         </AvatarFallback>
                       </Avatar>
                     </button>
@@ -442,10 +496,10 @@ export default function NotesPage() {
                     className="break-inside-avoid p-5 hover:shadow-md transition-shadow duration-200"
                   >
                     <div className="space-y-3">
-                      {renderNoteContent(note.blocks)}
+                      {renderNoteContent(note.content)}
                     </div>
                     <div className="mt-4 text-xs text-muted-foreground">
-                      {note.timestamp}
+                      {formatNoteTime(note.createdAt)}
                     </div>
                   </Card>
                 ))}
@@ -458,10 +512,10 @@ export default function NotesPage() {
                     className="p-5 hover:shadow-md transition-shadow duration-200"
                   >
                     <div className="space-y-3">
-                      {renderNoteContent(note.blocks)}
+                      {renderNoteContent(note.content)}
                     </div>
                     <div className="mt-4 text-xs text-muted-foreground">
-                      {note.timestamp}
+                      {formatNoteTime(note.createdAt)}
                     </div>
                   </Card>
                 ))}
@@ -480,13 +534,22 @@ export default function NotesPage() {
             <DialogDescription>登录或注册开始记录你的想法</DialogDescription>
           </DialogHeader>
 
-          <Tabs defaultValue="login" className="mt-4">
+          <Tabs
+            defaultValue="login"
+            className="mt-4"
+            onValueChange={() => setAuthError('')}
+          >
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">登录</TabsTrigger>
               <TabsTrigger value="register">注册</TabsTrigger>
             </TabsList>
 
             <TabsContent value="login" className="space-y-4 mt-6">
+              {authError && (
+                <p className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
+                  {authError}
+                </p>
+              )}
               <div className="space-y-2">
                 <label
                   className="text-sm font-medium text-foreground"
@@ -501,6 +564,7 @@ export default function NotesPage() {
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
                   className="h-11"
+                  disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">
@@ -517,18 +581,24 @@ export default function NotesPage() {
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
                   className="h-11"
+                  disabled={isLoading}
                 />
               </div>
               <Button
                 onClick={handleLogin}
-                disabled={!loginEmail || !loginPassword}
+                disabled={!loginEmail || !loginPassword || isLoading}
                 className="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-11"
               >
-                登录
+                {isLoading ? '登录中...' : '登录'}
               </Button>
             </TabsContent>
 
             <TabsContent value="register" className="space-y-4 mt-6">
+              {authError && (
+                <p className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
+                  {authError}
+                </p>
+              )}
               <div className="space-y-2">
                 <label
                   className="text-sm font-medium text-foreground"
@@ -543,6 +613,7 @@ export default function NotesPage() {
                   value={registerName}
                   onChange={(e) => setRegisterName(e.target.value)}
                   className="h-11"
+                  disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">
@@ -559,6 +630,7 @@ export default function NotesPage() {
                   value={registerEmail}
                   onChange={(e) => setRegisterEmail(e.target.value)}
                   className="h-11"
+                  disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">
@@ -575,6 +647,7 @@ export default function NotesPage() {
                   value={registerPassword}
                   onChange={(e) => setRegisterPassword(e.target.value)}
                   className="h-11"
+                  disabled={isLoading}
                 />
               </div>
               <div className="space-y-2">
@@ -591,6 +664,7 @@ export default function NotesPage() {
                   value={registerConfirmPassword}
                   onChange={(e) => setRegisterConfirmPassword(e.target.value)}
                   className="h-11"
+                  disabled={isLoading}
                 />
                 {registerConfirmPassword &&
                   registerPassword !== registerConfirmPassword && (
@@ -606,11 +680,12 @@ export default function NotesPage() {
                   !registerPassword ||
                   !registerConfirmPassword ||
                   !registerName ||
-                  registerPassword !== registerConfirmPassword
+                  registerPassword !== registerConfirmPassword ||
+                  isLoading
                 }
                 className="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-11"
               >
-                注册
+                {isLoading ? '注册中...' : '注册'}
               </Button>
             </TabsContent>
           </Tabs>

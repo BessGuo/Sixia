@@ -4,12 +4,23 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   ArrowLeftIcon,
   CheckIcon,
   LayoutListIcon,
   LayoutGridIcon,
+  MailIcon,
+  CalendarIcon,
+  UserIcon,
 } from 'lucide-react';
+
+type User = {
+  id: string;
+  email: string;
+  name: string;
+  createdAt: string;
+};
 
 const themes = [
   {
@@ -81,12 +92,18 @@ export default function SettingsPage() {
   const router = useRouter();
   const [selectedTheme, setSelectedTheme] = useState('default');
   const [selectedLayout, setSelectedLayout] = useState('list');
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') || 'default';
     const savedLayout = localStorage.getItem('layout') || 'list';
     setSelectedTheme(savedTheme);
     setSelectedLayout(savedLayout);
+
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+      setCurrentUser(JSON.parse(savedUser));
+    }
   }, []);
 
   const handleThemeChange = (themeId: string) => {
@@ -125,6 +142,74 @@ export default function SettingsPage() {
 
       {/* Main Content */}
       <main className="max-w-2xl mx-auto px-4 py-6">
+        {/* User Info Section */}
+        {currentUser && (
+          <section className="mb-8">
+            <Card className="p-6">
+              <div className="flex items-start gap-4">
+                <Avatar className="w-16 h-16">
+                  <AvatarFallback className="bg-accent text-accent-foreground text-xl font-semibold">
+                    {currentUser.name?.charAt(0) || '用'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-lg font-semibold text-foreground mb-4">
+                    账户信息
+                  </h2>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                        <UserIcon className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-muted-foreground mb-0.5">
+                          用户名
+                        </p>
+                        <p className="text-sm text-foreground truncate">
+                          {currentUser.name}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                        <MailIcon className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-muted-foreground mb-0.5">
+                          邮箱
+                        </p>
+                        <p className="text-sm text-foreground truncate">
+                          {currentUser.email}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+                        <CalendarIcon className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-muted-foreground mb-0.5">
+                          注册时间
+                        </p>
+                        <p className="text-sm text-foreground">
+                          {new Date(currentUser.createdAt).toLocaleDateString(
+                            'zh-CN',
+                            {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                            }
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </section>
+        )}
+
         <section>
           <h2 className="text-sm font-medium text-foreground mb-1">界面配色</h2>
           <p className="text-xs text-muted-foreground mb-4">
